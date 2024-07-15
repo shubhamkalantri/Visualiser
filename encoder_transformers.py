@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from tqdm import tqdm
-from transformers import AutoProcessor, CLIPModel
+from transformers import AutoProcessor, CLIPModel, AutoTokenizer
 from PIL import Image
 import os
 from random import shuffle
@@ -9,6 +9,7 @@ from random import shuffle
 class encoder():
     def __init__(self, model_name):
         self.processor = AutoProcessor.from_pretrained(model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = CLIPModel.from_pretrained(model_name).to("cuda")
         self.model.eval()
     
@@ -37,7 +38,14 @@ class encoder():
 
         return image_features
     
+    def get_text_features(self, text):
+        inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+        with torch.no_grad():
+            text_features = self.model.get_text_features(**inputs).cpu().detach().numpy()
+        return text_features
+    
     def process_and_encode(self, image_folder, categories, num_samples, proj=True):
         images_processed = self.process_images(image_folder, categories, num_samples)
         image_features = self.get_image_features(images_processed, proj)
         return image_features
+    

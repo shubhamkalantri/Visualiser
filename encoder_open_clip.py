@@ -8,6 +8,7 @@ from random import shuffle
 
 class encoder():
     def __init__(self, model_name, pretrained=None):
+        self.tokenizer = open_clip.get_tokenizer(model_name)
         self.model, _, self.preprocess = open_clip.create_model_and_transforms(model_name, pretrained=pretrained)
         self.model.eval()
     
@@ -35,6 +36,12 @@ class encoder():
         image_features = np.squeeze(np.array(image_features))
         
         return image_features
+    
+    def get_text_features(self, text):
+        inputs = self.tokenizer(text)
+        text_features = self.model.encode_text(inputs).cpu().detach().numpy()
+
+        return text_features
     
     def process_and_encode(self, image_folder, categories, num_samples, proj=True):
         images_processed = self.process_images(image_folder, categories, num_samples)

@@ -8,8 +8,10 @@ class plotter():
         self.tsne = TSNE(n_components=3 if self.threeD else 2)
 
     def plot(self, image_features, text_features=None, fname=None, num_samples=None, categories=None):
-        features = np.concatenate((image_features, text_features), axis=0)
-        print(features.shape)
+        if text_features:
+            features = np.concatenate((image_features, text_features), axis=0)
+        else:
+            features = image_features
         results = self.tsne.fit_transform(features)
         fig = plt.figure()
         numCats = len(categories)
